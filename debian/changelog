@@ -1,0 +1,5 @@
+libvmod-curl (0.0.1-1) unstable; urgency=low
+
+  * Initial debianized release
+
+ -- webops <webops@newsweek.com>  Wed, 06 Mar 2013 21:32:45 +0000
