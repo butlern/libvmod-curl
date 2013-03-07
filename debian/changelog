@@ -1,4 +1,4 @@
-libvmod-curl (0.0.1-1) unstable; urgency=low
+libvmod-curl (0.0.1-1) precise; urgency=low
 
   * Initial debianized release
 
