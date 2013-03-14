@@ -1,3 +1,67 @@
+libvmod-curl (0.0.1-webops2~precise8) precise; urgency=low
+
+  * Use heuristics to determine source uri
+
+ -- webops <webops@newsweek.com>  Thu, 14 Mar 2013 16:56:09 +0000
+
+libvmod-curl (0.0.1-webops2~precise7) precise; urgency=low
+
+  * Add python-software-properties dependency to control
+
+ -- webops <webops@newsweek.com>  Thu, 14 Mar 2013 14:00:33 +0000
+
+libvmod-curl (0.0.1-webops2~precise6) precise; urgency=low
+
+  * Change method to apt-add-repository
+
+ -- webops <webops@newsweek.com>  Thu, 14 Mar 2013 11:37:36 +0000
+
+libvmod-curl (0.0.1-webops2~precise5) precise; urgency=low
+
+  * Add libcurl dependency
+
+ -- webops <webops@newsweek.com>  Thu, 14 Mar 2013 00:08:15 +0000
+
+libvmod-curl (0.0.1-webops2~precise4) precise; urgency=low
+
+  * Remove dget signature verification temporarily for testing
+
+ -- webops <webops@newsweek.com>  Wed, 13 Mar 2013 20:24:27 +0000
+
+libvmod-curl (0.0.1-webops2~precise3) precise; urgency=low
+
+  * Add curl as build dependency
+
+ -- webops <webops@newsweek.com>  Wed, 13 Mar 2013 17:15:02 +0000
+
+libvmod-curl (0.0.1-webops2~precise2) precise; urgency=low
+
+  * Add devscripts as build dependency
+
+ -- webops <webops@newsweek.com>  Wed, 13 Mar 2013 14:10:10 +0000
+
+libvmod-curl (0.0.1-webops2~precise1) precise; urgency=low
+
+  * Update debian/rules to use dget to install varnish source
+
+ -- webops <webops@newsweek.com>  Tue, 12 Mar 2013 21:53:11 +0000
+
+libvmod-curl (0.0.1-webops2~precise0) precise; urgency=low
+
+  [ webops ]
+  * Add rename-manpage.patch
+
+  [ webops ]
+  * Add debugging info
+
+ -- webops <webops@newsweek.com>  Tue, 12 Mar 2013 19:16:47 +0000
+
+libvmod-curl (0.0.1-webops1~precise0) precise; urgency=low
+
+  * Update override_dh_auto_configure to install a source repo
+
+ -- webops <webops@newsweek.com>  Tue, 12 Mar 2013 14:32:43 +0000
+
 libvmod-curl (0.0.1-webops0~precise0) precise; urgency=low
 
   * Initial debianized release

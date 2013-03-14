@@ -1,0 +1,13 @@
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -12,8 +12,8 @@
+ 	vmod_curl.c \
+ 	vmod_curl.h
+ 
+-vcc_if.c vcc_if.h: $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/vmod_curl.vcc
+-	@PYTHON@ $(VARNISHSRC)/lib/libvmod_std/vmod.py $(top_srcdir)/src/vmod_curl.vcc
++vcc_if.c vcc_if.h: $(top_srcdir)/vmod.py $(top_srcdir)/src/vmod_curl.vcc
++	@PYTHON@ $(top_srcdir)/vmod.py $(top_srcdir)/src/vmod_curl.vcc
+ 
+ VMOD_TESTS = tests/*.vtc
+ .PHONY: $(VMOD_TESTS)
