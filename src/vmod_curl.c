@@ -11,8 +11,6 @@
 #include "vcc_if.h"
 #include "vmod_curl.h"
 
-#include "config.h"
-
 struct hdr {
 	char *key;
 	char *value;
@@ -125,12 +123,34 @@ init_function(struct vmod_priv *priv, const struct VCL_conf *conf)
 static size_t recv_data(void *ptr, size_t size, size_t nmemb, void *s)
 {
 	struct vmod_curl *vc;
-
-	CAST_OBJ_NOTNULL(vc, s, VMOD_CURL_MAGIC);
-
+    char *split;
+	
+    CAST_OBJ_NOTNULL(vc, s, VMOD_CURL_MAGIC);
+    
+    split = memchr(ptr, ':', size * nmemb);
+	if (split == NULL)
+        return (size * nmemb);
+    
 	VSB_bcat(vc->body, ptr, size * nmemb);
 	return size * nmemb;
 }
+
+static size_t recv_body(void *ptr, size_t size, size_t nmemb, void *s)
+{
+    struct vmod_curl *vc;
+    
+    if(((nmemb-1)/2) != 0 )
+    {
+        
+        CAST_OBJ_NOTNULL(vc, s, VMOD_CURL_MAGIC);
+    
+        VSB_bcat(vc->body, ptr, size * nmemb);
+    }
+    
+  return (size * nmemb);
+}
+
+
 
 static size_t recv_hdrs(void *ptr, size_t size, size_t nmemb, void *s)
 {
@@ -140,11 +160,14 @@ static size_t recv_hdrs(void *ptr, size_t size, size_t nmemb, void *s)
 	ptrdiff_t keylen, vallen;
 
 	CAST_OBJ_NOTNULL(vc, s, VMOD_CURL_MAGIC);
-
+    
+   
 	split = memchr(ptr, ':', size * nmemb);
 	if (split == NULL)
+    {
 		return (size * nmemb);
-
+    }
+    
 	keylen = split - (char *)ptr;
 	assert(keylen >= 0);
 	if (keylen == 0)
@@ -194,26 +217,18 @@ void vmod_fetch(struct sess *sp, const char *url)
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 	curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL , 1L);
 	curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, recv_data);
+    
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, recv_data);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, c);
 	curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, recv_hdrs);
 	curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, c);
 
-	if (c->timeout_ms > 0) {
-#ifdef CURL_TIMEOUTMS_WORKS
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, c->timeout_ms);
-#else
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, c->timeout_ms / 1000);
-#endif
-	}
 
-	if (c->connect_timeout_ms > 0) {
-#ifdef CURL_TIMEOUTMS_WORKS
-		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT_MS, c->connect_timeout_ms);
-#else
-		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, c->connect_timeout_ms / 1000);
-#endif
-	}
+	if (c->timeout_ms > 0)
+	  curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, c->timeout_ms);
+
+	if (c->connect_timeout_ms > 0)
+	  curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT_MS, c->connect_timeout_ms);
 
 	if (c->flags & VC_VERIFY_PEER) {
 		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 1L);
@@ -244,6 +259,63 @@ void vmod_fetch(struct sess *sp, const char *url)
 	curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &c->status);
 
 	VSB_finish(c->body);
+	curl_easy_cleanup(curl_handle);
+}
+
+void vmod_fetch_post(struct sess *sp, const char *formParams, const char *cookiesParams, const char *headerParams, const char *url)
+{
+	CURL *curl_handle;
+	CURLcode cr;
+    
+	struct vmod_curl *c;
+	char *p;
+	unsigned u, v;
+	struct hdr *h, *h2;
+    struct write_result *result;
+    struct curl_slist *slist = NULL;
+    
+	c = cm_get(sp);
+    
+	cm_clear_headers(c);
+	cm_clear_body(c);
+    
+	curl_handle = curl_easy_init();
+	AN(curl_handle);
+    
+    
+    curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, formParams);
+    curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+    curl_easy_setopt(curl_handle, CURLOPT_COOKIE, cookiesParams);
+    curl_easy_setopt(curl_handle, CURLOPT_HEADER, 1L);
+    curl_easy_setopt(curl_handle, CURLOPT_COOKIESESSION, 1L);
+    
+    curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL , 1L);
+	curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
+	
+    /*Add Body Tag as a Heade*/
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, recv_hdrs);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, c);
+	
+    
+    
+    if(headerParams != NULL)
+    {
+        slist = curl_slist_append(slist, headerParams);
+        curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, slist);
+    }
+    
+    cr = curl_easy_perform(curl_handle);
+   
+   if (cr != 0) {
+		c->error = curl_easy_strerror(cr);
+	}
+    
+	curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &c->status);
+    
+	VSB_finish(c->body);
+    
+    curl_slist_free_all(slist);
 	curl_easy_cleanup(curl_handle);
 }
 

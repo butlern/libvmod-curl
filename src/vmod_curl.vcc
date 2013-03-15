@@ -1,7 +1,14 @@
 Module curl
 Init init_function
-# Fetch the URL in the first parameter
+# Fetch the URL in the first parameter - GET
 Function VOID fetch(STRING)
+
+# Fetch the URL in the first parameter - POST
+#const char *formParams, const char *cookiesParams, const char *headerParams, const char *url
+
+Function VOID fetch_post(STRING,STRING,STRING,STRING)
+
+
 # Return the header named in the first argument
 Function STRING header(STRING)
 # Free the memory used by headers. Not needed, will be handled
