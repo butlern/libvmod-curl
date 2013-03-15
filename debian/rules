@@ -38,7 +38,7 @@ VMODDIR := $(PREFIX)/lib/varnish/vmods
 DISTRO := $(shell dpkg-parsechangelog|grep Distribution|awk '{print $$2}')
 VARNISH_APT_VERSION := $(shell apt-cache policy varnish |tail -2|head -1|awk '{print $$1}')
 UPSTREAM_VERSION := $(shell echo $(VARNISH_APT_VERSION) | cut -f 1 -d -)
-APT_SOURCE_URI := $(shell egrep '^deb.* $(DISTRO) .*universe' /etc/apt/sources.list|awk '{print $$2}'|sed 's/[/]\+$$//')
+APT_SOURCE_URI := $(shell egrep '^deb.* $(DISTRO) .*universe' /etc/apt/sources.list|awk '{print $$2}'|tail -1|sed 's/[/]\+$$//')
 DGET_URI := $(APT_SOURCE_URI)/pool/universe/v/varnish/varnish_$(VARNISH_APT_VERSION).dsc
 VARNISH_SOURCE := varnish-$(UPSTREAM_VERSION)
 
