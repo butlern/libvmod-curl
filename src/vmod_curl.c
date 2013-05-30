@@ -305,6 +305,12 @@ void vmod_fetch_post(struct sess *sp, const char *formParams, const char *cookie
         curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, slist);
     }
     
+    if (c->timeout_ms > 0)
+        curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT_MS, c->timeout_ms);
+
+    if (c->connect_timeout_ms > 0)
+        curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT_MS, c->connect_timeout_ms);
+
     cr = curl_easy_perform(curl_handle);
    
    if (cr != 0) {
